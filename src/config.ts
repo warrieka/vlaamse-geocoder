@@ -1,4 +1,5 @@
 export interface AppConfig {
+  version: string | undefined;
   /** Maximum file size in MB */
   maxFileSizeMB: number;
   /** Maximum data rows allowed (excluding header) */
@@ -14,6 +15,7 @@ declare global {
 }
 
 export const DEFAULT_CONFIG: AppConfig = {
+  version: '',
   maxFileSizeMB: 10,
   maxRows: 5000,
   maxColumns: 50,
@@ -23,6 +25,7 @@ export const getAppConfig = (): AppConfig => {
   if (typeof window !== 'undefined' && window.APP_CONFIG) {
     const custom = window.APP_CONFIG;
     return {
+      version: custom.version,
       maxFileSizeMB:
         typeof custom.maxFileSizeMB === 'number' && custom.maxFileSizeMB > 0
           ? custom.maxFileSizeMB

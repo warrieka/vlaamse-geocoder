@@ -1,4 +1,5 @@
 import React from 'react';
+import { getAppConfig } from '@/src/config'; '../../config';
 import geolocIcon from '../../assets/Adres.svg';
 import gitIcon from '../../assets/github.svg';
 
@@ -8,6 +9,8 @@ interface HeaderProps {
   rowCount: number;
   matchedCount: number;
 }
+
+let config = getAppConfig()
 
 export const Header: React.FC<HeaderProps> = ({
   activeView,
@@ -29,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
                 Vlaamse Adres-Geocoder
               </h1>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-900 border border-amber-200">
-                v2.0
+                {config.version}
               </span>
             </div>
             <p className="text-xs text-slate-500 hidden sm:block">
