@@ -1,20 +1,20 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Vlaamse Geocodeer tool
 
-# Run and deploy your AI Studio app
+This allow you to geocode a csv-file with FLemish adresses using different geocoders including:
 
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/ab3983fe-bc2e-4355-b7f6-8bf5c495f36a
+- The Geolocation API from digitaal Vlaanderen: <https://geo.api.vlaanderen.be/geolocation/>
+- OSM Nominatim: <https://nominatim.org/>
+- Vlaamse adressenregister: <https://www.vlaanderen.be/digitaal-vlaanderen/onze-oplossingen/gebouwen-en-adressenregister#informatie-voor-gebruikers>
+- Or you can pinpoint the address manually on a the map.
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
-
+**Prerequisites:**  Node.js  
+<https://nodejs.org/>
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Run the app development server:
    `npm run dev`
+3. Run for production:
+   `npm run build && npm run preview`
