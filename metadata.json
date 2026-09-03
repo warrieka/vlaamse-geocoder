@@ -1,0 +1,6 @@
+{
+  "name": "Vlaamse Geocoder",
+  "description": "Modern upgrade of the online Flemish geocoder with modern GIS libraries, Digitaal Vlaanderen APIs, Proj4 CRS projections, and interactive map.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
