@@ -61,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* External Link & Team Reference */}
         <div className="hidden lg:flex items-center gap-3 text-xs text-slate-500">
           <a
-            href="https://github.com/Team-Data-Antwerpen/vl_geocoder"
+            href="https://github.com/warrieka/vlaamse-geocoder"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 font-medium px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"

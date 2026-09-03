@@ -1,8 +1,9 @@
-# Vlaamse Geocoder
+[Vlaamse Geocoder](https://warrieka.github.io/vlaamse-geocoder/)
+========================
 
 A modern, browser‑based tool to **batch‑geocode CSV files of Flemish addresses** and convert the results to any Belgian CRS. Everything runs locally in your browser — the CSV never leaves your machine, only the individual geocoding requests go out to the chosen provider.
 
-Live app: [vlaamse-geocoder](https://warrieka.github.io/vlaamse-geocoder/)
+![Demo app](img/demo.gif)
 
 ## What you can do
 
