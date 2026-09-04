@@ -2,6 +2,7 @@ import React from 'react';
 import { getAppConfig } from '@/src/config'; '../../config';
 import geolocIcon from '../../assets/Adres.svg';
 import gitIcon from '../../assets/github.svg';
+import { Layers, Lightbulb } from 'lucide-react';
 
 interface HeaderProps {
   activeView: 'geocoder' | 'advisor';
@@ -42,9 +43,10 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* View Switcher Navigation Tabs */}
-        {/*  <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium">
           <button
             onClick={() => onChangeView('geocoder')}
+            aria-pressed={activeView === 'geocoder'}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
               activeView === 'geocoder'
                 ? 'bg-white text-slate-900 shadow-xs font-semibold'
@@ -52,14 +54,26 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <Layers className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Geocoder & Kaart</span>
+            <span>Geocoder</span>
             {rowCount > 0 && (
               <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700">
                 {matchedCount}/{rowCount}
               </span>
             )}
           </button>
-        </div> */}
+          <button
+            onClick={() => onChangeView('advisor')}
+            aria-pressed={activeView === 'advisor'}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+              activeView === 'advisor'
+                ? 'bg-white text-slate-900 shadow-xs font-semibold'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Lightbulb className="w-3.5 h-3.5 text-amber-600" />
+            <span>Info</span>
+          </button>
+        </div>
 
         {/* External Link & Team Reference */}
         <div className="hidden lg:flex items-center gap-3 text-xs text-slate-500">

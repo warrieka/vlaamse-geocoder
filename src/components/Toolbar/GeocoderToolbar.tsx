@@ -167,7 +167,7 @@ export const GeocoderToolbar: React.FC<GeocoderToolbarProps> = ({
 
             {showExportMenu && (
               <div
-                className="absolute right-0 mt-1 w-44 bg-white rounded-lg border border-slate-200 shadow-lg py-1 z-30"
+                className="absolute right-0 top-full mt-1 w-44 bg-white rounded-lg border border-slate-200 shadow-lg py-1 z-50"
                 onClick={() => setShowExportMenu(false)}
               >
                 <button

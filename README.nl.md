@@ -1,4 +1,5 @@
-# [Vlaamse Geocoder](https://warrieka.github.io/vlaamse-geocoder/)
+Vlaamse Geocoder
+===================
 
 De **Vlaamse Geocoder** is een eenvoudige webtoepassing waarmee je snel een groot aantal Vlaamse adressen kunt omzetten naar geografische coördinaten.
 

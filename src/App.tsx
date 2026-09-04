@@ -7,6 +7,7 @@ import {
   GeocodeResult,
 } from './types';
 import { Header } from './components/Header/Header';
+import { AdvisorPanel } from './components/Advisor/AdvisorPanel';
 import { FileImporter } from './components/Upload/FileImporter';
 import { GeocoderToolbar } from './components/Toolbar/GeocoderToolbar';
 import { ModernMap } from './components/Map/ModernMap';
@@ -15,7 +16,7 @@ import { PinpointModal } from './components/Modal/PinpointModal';
 import { useGeocoderRunner } from './hooks/useGeocoderRunner';
 import { exportRowsToCsv, exportRowsToGeoJson } from './services/export';
 import { fromWgs84 } from './services/projections';
-import { Trash2, AlertTriangle, X } from 'lucide-react';
+import { Trash2, AlertTriangle, X, Lightbulb } from 'lucide-react';
 
 interface PersistedState {
   rows: AddressRow[];
@@ -302,7 +303,21 @@ export default function App() {
 
       {/* Main Workspace Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-4">
-          {/* Main Geocoder & Map Workspace */}
+          {activeView === 'advisor' ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                  <Lightbulb className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-slate-900 tracking-tight">
+                    Documentatie
+                  </h2>
+                </div>
+              </div>
+              <AdvisorPanel />
+            </div>
+          ) : (
           <div className="flex flex-col gap-4">
             {/* File Importer and Sample loader */}
             <FileImporter
@@ -366,6 +381,7 @@ export default function App() {
               isProcessing={isProcessing}
             />
           </div>
+          )}
       </main>
 
       {/* Interactive Pinpoint Modal */}
