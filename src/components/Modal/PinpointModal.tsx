@@ -111,7 +111,7 @@ export const PinpointModal: React.FC<PinpointModalProps> = ({
             </div>
             {addressGuess && (
               <div className="text-indigo-700 font-medium">
-                📍 Reverse lookup: {addressGuess}
+                📍 Meest nabij adres: {addressGuess}
               </div>
             )}
           </div>

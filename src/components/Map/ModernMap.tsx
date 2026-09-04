@@ -4,6 +4,7 @@ import { AddressRow, CrsId } from '../../types';
 import { transformCoords, formatCoordinates } from '../../services/projections';
 import { reverseGeocode, geocodeFlemishGeolocation } from '../../services/geocoder';
 import { MapPin, Home, Search, ZoomIn, ZoomOut, Check, Loader2, XCircle } from 'lucide-react';
+import { AddressSearchInput } from './AddressSearchInput';
 
 interface ModernMapProps {
   rows: AddressRow[];
@@ -117,7 +118,10 @@ export const ModernMap: React.FC<ModernMapProps> = ({
       } else {
         const pinIcon = L.divIcon({
           className: 'custom-pin-marker',
-          html: `<div style="background-color: #6366f1; width: 22px; height: 22px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;"><div style="width: 6px; height: 6px; background-color: white; border-radius: 50%;"></div></div>`,
+          html: `<div style="background-color: #6366f1; width: 22px; height: 22px; border-radius: 50%; 
+          border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; 
+          justify-content: center;"><div style="width: 6px; height: 6px; background-color: white; border-radius: 50%;">
+          </div></div>`,
           iconSize: [22, 22],
           iconAnchor: [11, 11],
         });
@@ -296,6 +300,27 @@ export const ModernMap: React.FC<ModernMapProps> = ({
 
   const handleZoomIn = () => mapInstanceRef.current?.zoomIn();
   const handleZoomOut = () => mapInstanceRef.current?.zoomOut();
+
+  // Geocode a chosen suggestion and fly the map to it
+  const handleSearchSelect = async (fullAddress: string) => {
+    const res = await geocodeFlemishGeolocation({ fullAddress }, targetCrs);
+    if (res.lat != null && res.lon != null) {
+      mapInstanceRef.current?.setView([res.lat, res.lon], 17);
+      const searchPin = L.divIcon({
+        className: 'custom-pin-marker',
+        html: `<div style="background-color: #6366f1; width: 22px; height: 22px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;"><div style="width: 6px; height: 6px; background-color: white; border-radius: 50%;"></div></div>`,
+        iconSize: [22, 22],
+        iconAnchor: [11, 11],
+      });
+      if (searchMarkerRef.current) {
+        searchMarkerRef.current.setLatLng([res.lat, res.lon]);
+      } else {
+        searchMarkerRef.current = L.marker([res.lat, res.lon], { icon: searchPin }).addTo(
+          mapInstanceRef.current!
+        );
+      }
+    }
+  };
   const handleFitBounds = () => {
     if (!mapInstanceRef.current || !markersLayerRef.current) return;
     const bounds: L.LatLngBounds = L.latLngBounds([]);
@@ -319,7 +344,7 @@ export const ModernMap: React.FC<ModernMapProps> = ({
   };
 
   return (
-    <div className="relative w-full overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-slate-50" style={{ height }}>
+    <div className="relative w-full overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-slate-50" style={{ height }}> {/* cursor: pinpointMode ? 'crosshair' : 'default' */}
       {/* Map Container */}
       <div ref={mapContainerRef} className="w-full h-full" />
 
@@ -387,11 +412,16 @@ export const ModernMap: React.FC<ModernMapProps> = ({
         </div>
       </div>
 
+      {/* Address Search (Top Left) */}
+      <div className="absolute top-3 left-3 z-30">
+        <AddressSearchInput onAddressSelect={handleSearchSelect} />
+      </div>
+
       {/* Pinpoint Mode Banner (Top Center) */}
       {pinpointMode && (
         <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-indigo-600/95 backdrop-blur text-white px-3.5 py-1.5 rounded-full shadow-lg text-xs font-medium flex items-center gap-2 animate-pulse">
           <MapPin className="w-3.5 h-3.5" />
-          <span>Klik of versleep de marker om het adres handmatig te prikken</span>
+          <span>Klik op de kaart om het adres<br/> handmatig aan te duiden</span>
         </div>
       )}
 
@@ -413,11 +443,6 @@ export const ModernMap: React.FC<ModernMapProps> = ({
         {reverseLoading && (
           <span className="flex items-center gap-1 text-indigo-600 font-medium ml-2">
             <Loader2 className="w-3 h-3 animate-spin" /> Adres ophalen...
-          </span>
-        )}
-        {reverseResult && !reverseLoading && (
-          <span className="text-slate-600 font-medium ml-1 truncate max-w-xs" title={reverseResult}>
-            📍 {reverseResult}
           </span>
         )}
       </div>

@@ -129,6 +129,43 @@ export async function geocodeFlemishGeolocation(
 }
 
 /**
+ * Returns a list of suggested addresses based on a partial address string
+ * Uses the lightweight Flemish Geolocation Suggestion endpoint
+ */
+export async function suggestAddresses(query: string): Promise<string[]> {
+  if (!query.trim()) {
+    return [];
+  }
+
+  const endpoint = `https://geo.api.vlaanderen.be/geolocation/V4/Suggestion?q=${encodeURIComponent(
+    query
+  )}`;
+
+  try {
+    const res = await fetch(endpoint, {
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Flemish Suggestion API returned HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const items = data?.SuggestionResult || [];
+    if (!Array.isArray(items)) {
+      return [];
+    }
+    return items
+
+  } catch (err: any) {
+    console.error('Flemish Suggestion API error:', err);
+    return [];
+  }
+}
+
+/**
  * Digitaal Vlaanderen Basisregisters v2 Adresmatch
  * Official base registry of Flemish addresses
  */
