@@ -63,8 +63,8 @@ export default function App() {
     () => savedInitial?.selectedGeocoder ?? 'geoloc'
   );
   const [selectedCrs, setSelectedCrs] = useState<CrsId>(
-    () => savedInitial?.selectedCrs ?? 'EPSG:31370'
-  ); // Belgian Lambert 72 default
+    () => savedInitial?.selectedCrs ?? 'EPSG:3812'
+  ); // Lambert 2008 (Belgium) default
   const [activeRowId, setActiveRowId] = useState<string | null>(null);
   const [pinpointRow, setPinpointRow] = useState<AddressRow | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState<boolean>(false);

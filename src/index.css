@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
+@import "tailwindcss";
 
 /* Leaflet marker & map fixes */
 .leaflet-container {
@@ -7,6 +7,15 @@
   height: 100%;
   z-index: 10;
   font-family: inherit;
+}
+
+/* Ensure draggable marker icons receive pointer events (drag must work) */
+.leaflet-marker-icon.leaflet-interactive {
+  pointer-events: auto;
+  cursor: grab;
+}
+.leaflet-marker-icon.leaflet-drag-target {
+  cursor: move;
 }
 
 /* Address search placeholder (light grey) */
