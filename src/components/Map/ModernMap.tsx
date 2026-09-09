@@ -3,7 +3,7 @@ import L from 'leaflet';
 import { AddressRow, CrsId } from '../../types';
 import { transformCoords, formatCoordinates } from '../../services/projections';
 import { reverseGeocode, geocodeFlemishGeolocation } from '../../services/geocoder';
-import { MapPin, Home, Search, ZoomIn, ZoomOut, Check, Loader2, XCircle } from 'lucide-react';
+import { MapPin, Home, ZoomIn, ZoomOut, Loader2 } from 'lucide-react';
 import { AddressSearchInput } from './AddressSearchInput';
 
 interface ModernMapProps {

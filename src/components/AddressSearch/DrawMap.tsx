@@ -5,7 +5,9 @@ import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { LngLat } from '../../services/polygon';
 import { AddressRecord } from '../../services/addresses';
+import { geocodeFlemishGeolocation } from '../../services/geocoder';
 import { ZoomIn, ZoomOut, Home, X, Check, Undo2 } from 'lucide-react';
+import { AddressSearchInput } from '../Map/AddressSearchInput';
 
 type BasemapType = 'grb' | 'osm' | 'aerial';
 
@@ -68,6 +70,7 @@ export const DrawMap: React.FC<DrawMapProps> = ({
   const vertexMarkersRef = useRef<L.Marker[]>([]);
 
   const resultsGroupRef = useRef<L.MarkerClusterGroup | null>(null);
+  const searchMarkerRef = useRef<L.Marker | null>(null);
   const resultsRef = useRef(results);
   resultsRef.current = results;
   const activeIdRef = useRef(activeId);
@@ -254,6 +257,26 @@ export const DrawMap: React.FC<DrawMapProps> = ({
   const handleZoomIn = () => mapRef.current?.zoomIn();
   const handleZoomOut = () => mapRef.current?.zoomOut();
 
+  const handleSearchSelect = async (fullAddress: string) => {
+    const res = await geocodeFlemishGeolocation({ fullAddress }, 'EPSG:4326');
+    if (res.lat != null && res.lon != null && mapRef.current) {
+      mapRef.current.setView([res.lat, res.lon], 17);
+      const searchPin = L.divIcon({
+        className: 'custom-pin-marker',
+        html: `<div style="background-color: #6366f1; width: 22px; height: 22px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;"><div style="width: 6px; height: 6px; background-color: white; border-radius: 50%;"></div></div>`,
+        iconSize: [22, 22],
+        iconAnchor: [11, 11],
+      });
+      if (searchMarkerRef.current) {
+        searchMarkerRef.current.setLatLng([res.lat, res.lon]);
+      } else {
+        searchMarkerRef.current = L.marker([res.lat, res.lon], { icon: searchPin }).addTo(
+          mapRef.current
+        );
+      }
+    }
+  };
+
   const handleFit = () => {
     if (!mapRef.current) return;
     if (points.length >= 2) {
@@ -272,6 +295,11 @@ export const DrawMap: React.FC<DrawMapProps> = ({
       style={{ height }}
     >
       <div ref={containerRef} className="w-full h-full" />
+
+      {/* Address search (top left) */}
+      <div className="absolute top-3 left-3 z-30">
+        <AddressSearchInput onAddressSelect={handleSearchSelect} />
+      </div>
 
       {/* Basemap switcher */}
       <div className="absolute top-3 right-3 z-20 flex flex-col gap-2 items-end">

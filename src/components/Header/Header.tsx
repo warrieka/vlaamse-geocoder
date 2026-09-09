@@ -54,6 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
                 ? 'bg-white text-slate-900 shadow-xs font-semibold'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
+            title='Addressen geocoderen uit CSV'
           >
             <Layers className="w-3.5 h-3.5 text-indigo-600" />
             <span>Geocoder</span>
@@ -71,9 +72,10 @@ export const Header: React.FC<HeaderProps> = ({
                 ? 'bg-white text-slate-900 shadow-xs font-semibold'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
+            title='Addressen donwloaden uit Adressenregister'
           >
             <Download className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Adres Download</span>
+            <span>Adressenregister</span>
           </button>
           <button
             onClick={() => onChangeView('advisor')}
@@ -83,6 +85,7 @@ export const Header: React.FC<HeaderProps> = ({
                 ? 'bg-white text-slate-900 shadow-xs font-semibold'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
+            title='Meer info en Help'
           >
             <Lightbulb className="w-3.5 h-3.5 text-amber-600" />
             <span>Info</span>

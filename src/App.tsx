@@ -62,7 +62,7 @@ export default function App() {
     () => savedInitial?.currentFilename ?? ''
   );
   const [selectedGeocoder, setSelectedGeocoder] = useState<GeocoderId>(
-    () => savedInitial?.selectedGeocoder ?? 'geoloc'
+    () => savedInitial?.selectedGeocoder ?? 'basisregisters'
   );
   const [selectedCrs, setSelectedCrs] = useState<CrsId>(
     () => savedInitial?.selectedCrs ?? 'EPSG:3812'

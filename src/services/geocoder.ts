@@ -250,13 +250,13 @@ export async function geocodeBasisregisters(
     }
 
     const score = match.score ? Math.round(match.score) : undefined;
-    const isExact = match.score >= 90;
+    const isExact = match.score >= 100;
 
     return {
       status: isExact ? 'exact' : 'partial',
       statusLabel: isExact
         ? `Officieel Toegekend (${score}%)`
-        : `Match score: ${score || 0}%`,
+        : `Benaderend (${score || 0}%)`,
       x: targetX,
       y: targetY,
       lat,

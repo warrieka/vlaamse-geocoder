@@ -73,12 +73,8 @@ export const GeocoderToolbar: React.FC<GeocoderToolbarProps> = ({
               disabled={isProcessing}
               className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 font-medium focus:ring-1 focus:ring-slate-900 focus:outline-none"
             >
-              <option value="geoloc">
-                Digitaal Vlaanderen Geolocation v4 (Aanbevolen)
-              </option>
-              <option value="basisregisters">
-                Basisregisters Vlaanderen v2 (via Adresmatch)
-              </option>
+              <option value="basisregisters">Basisregisters Vlaanderen v2 (Adresmatch)</option>
+              <option value="geoloc">Digitaal Vlaanderen Geolocation v4</option>
               <option value="nominatim">OpenStreetMap Nominatim (beperkt tot België)</option>
             </select>
           </div>
