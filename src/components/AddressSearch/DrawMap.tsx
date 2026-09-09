@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { LngLat } from '../../services/polygon';
+import { AddressRecord } from '../../services/addresses';
 import { ZoomIn, ZoomOut, Home, X, Check, Undo2 } from 'lucide-react';
 
 type BasemapType = 'grb' | 'osm' | 'aerial';
@@ -39,6 +40,8 @@ interface DrawMapProps {
   onMoveVertex: (index: number, lngLat: LngLat) => void;
   locked?: boolean;
   height?: string;
+  results?: AddressRecord[];
+  activeId?: string | null;
 }
 
 export const DrawMap: React.FC<DrawMapProps> = ({
@@ -51,6 +54,8 @@ export const DrawMap: React.FC<DrawMapProps> = ({
   onMoveVertex,
   locked = false,
   height = '420px',
+  results = [],
+  activeId = null,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -58,6 +63,12 @@ export const DrawMap: React.FC<DrawMapProps> = ({
 
   const drawGroupRef = useRef<L.LayerGroup | null>(null);
   const vertexMarkersRef = useRef<L.Marker[]>([]);
+
+  const resultsGroupRef = useRef<L.LayerGroup | null>(null);
+  const resultsRef = useRef(results);
+  resultsRef.current = results;
+  const activeIdRef = useRef(activeId);
+  activeIdRef.current = activeId;
 
   const [basemap, setBasemap] = useState<BasemapType>('grb');
   const [cursor, setCursor] = useState<{ lat: number; lon: number } | null>(null);
@@ -97,6 +108,9 @@ export const DrawMap: React.FC<DrawMapProps> = ({
 
     const group = L.layerGroup().addTo(map);
     drawGroupRef.current = group;
+
+    const resultsGroup = L.layerGroup().addTo(map);
+    resultsGroupRef.current = resultsGroup;
 
     map.on('mousemove', (e: L.LeafletMouseEvent) => {
       setCursor({ lat: e.latlng.lat, lon: e.latlng.lng });
@@ -143,6 +157,26 @@ export const DrawMap: React.FC<DrawMapProps> = ({
       maxZoom: config.maxZoom,
     }).addTo(mapRef.current);
   }, [basemap]);
+
+  // Draw found addresses as simple blue dots.
+  useEffect(() => {
+    if (!mapRef.current || !resultsGroupRef.current) return;
+    const resultsGroup = resultsGroupRef.current;
+    resultsGroup.clearLayers();
+
+    results
+      .filter((r) => r.lat != null && r.lon != null)
+      .forEach((r) => {
+        L.circleMarker([r.lat!, r.lon!], {
+          radius: activeIdRef.current === r.id ? 8 : 6,
+          color: '#ffffff',
+          weight: 2,
+          fillColor: activeIdRef.current === r.id ? '#1d4ed8' : '#3b82f6',
+          fillOpacity: 1,
+          interactive: false,
+        }).addTo(resultsGroup);
+      });
+  }, [results, activeId]);
 
   // Redraw polygon based on current points.
   useEffect(() => {

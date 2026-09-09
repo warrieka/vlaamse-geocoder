@@ -152,6 +152,8 @@ export const AddressSearchView: React.FC = () => {
         onMoveVertex={handleMoveVertex}
         locked={records.length > 0}
         height="420px"
+        results={records}
+        activeId={activeId}
       />
 
         <AddressTable records={records} activeId={activeId} onSelect={setActiveId} />

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AddressRecord } from '../../services/addresses';
 import { ExternalLink, Search, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 
@@ -13,6 +13,15 @@ interface AddressTableProps {
 export const AddressTable: React.FC<AddressTableProps> = ({ records, activeId, onSelect }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const tableRef = useRef<HTMLDivElement>(null);
+  const prevCountRef = useRef(0);
+
+  useEffect(() => {
+    if (prevCountRef.current === 0 && records.length > 0) {
+      tableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    prevCountRef.current = records.length;
+  }, [records.length]);
 
   const filtered = useMemo(() => {
     if (!searchTerm) return records;
@@ -33,7 +42,7 @@ export const AddressTable: React.FC<AddressTableProps> = ({ records, activeId, o
   };
 
   return (
-    <div className="flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div ref={tableRef} className="flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden scroll-mt-4">
       {/* Header / search */}
       <div className="p-3.5 border-b border-slate-200 bg-slate-50/50 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="relative w-full max-w-md flex-1">
