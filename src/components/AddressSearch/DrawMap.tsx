@@ -137,6 +137,13 @@ export const DrawMap: React.FC<DrawMapProps> = ({
 
     map.on('click', (e: L.LeafletMouseEvent) => {
       if (closedRef.current || lockedRef.current) return;
+      // Ignore clicks landing on top of an existing vertex (screen-pixel test),
+      // which would otherwise create duplicate corners and self-intersections.
+      const clickPoint = map.mouseEventToContainerPoint(e.originalEvent);
+      const nearVertex = pointsRef.current.some(
+        (p) => map.latLngToContainerPoint([p[1], p[0]]).distanceTo(clickPoint) < 15
+      );
+      if (nearVertex) return;
       onAddPointRef.current([e.latlng.lng, e.latlng.lat]);
     });
 
@@ -366,7 +373,7 @@ export const DrawMap: React.FC<DrawMapProps> = ({
       {/* Action hint (top center) */}
       {!closed && (
         <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-indigo-600/95 backdrop-blur text-white px-3.5 py-1.5 rounded-full shadow-lg text-xs font-medium flex items-center gap-2">
-          <span>{points.length < 3 ? 'Klik op de kaart om een polygoon te tekenen' : 'Dubbelklik of druk op Enter om te sluiten'}</span>
+          <span>{points.length < 3 ? 'Klik op de kaart om een polygoon te tekenen' : 'Druk op Enter om te sluiten'}</span>
         </div>
       )}
 

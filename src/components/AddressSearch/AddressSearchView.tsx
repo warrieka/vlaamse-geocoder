@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { LngLat, computeAreaM2, formatArea, isSelfIntersecting } from '../../services/polygon';
 import { getAppConfig } from '../../config';
 import {
@@ -14,15 +14,66 @@ import { Ruler } from 'lucide-react';
 const MAX_AREA_M2 = getAppConfig().maxPolygonAreaM2;
 const MAX_ADDRESS_RESULTS = getAppConfig().maxAddressResults;
 
+const STORAGE_KEY = 'flanders_address_search_state_v1';
+
+interface AddressSearchPersisted {
+  points: LngLat[];
+  closed: boolean;
+  records: AddressRecord[];
+  truncated: boolean;
+  activeId: string | null;
+  lastSavedAt?: string;
+}
+
+const loadAddressSearchState = (): AddressSearchPersisted | null => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && Array.isArray(parsed.points) && Array.isArray(parsed.records)) {
+      return parsed;
+    }
+  } catch (err) {
+    console.warn('Fout bij uitlezen van LocalStorage (address search):', err);
+  }
+  return null;
+};
+
 export const AddressSearchView: React.FC = () => {
-  const [points, setPoints] = useState<LngLat[]>([]);
-  const [closed, setClosed] = useState(false);
+  const [savedInitial] = useState(() => loadAddressSearchState());
+  const [points, setPoints] = useState<LngLat[]>(() => savedInitial?.points ?? []);
+  const [closed, setClosed] = useState<boolean>(() => savedInitial?.closed ?? false);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [records, setRecords] = useState<AddressRecord[]>([]);
-  const [truncated, setTruncated] = useState(false);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [records, setRecords] = useState<AddressRecord[]>(() => savedInitial?.records ?? []);
+  const [truncated, setTruncated] = useState<boolean>(() => savedInitial?.truncated ?? false);
+  const [activeId, setActiveId] = useState<string | null>(() => savedInitial?.activeId ?? null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Persist state in localStorage with 300ms debounce (same pattern as the geocoder)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        if (points.length === 0 && records.length === 0) {
+          localStorage.removeItem(STORAGE_KEY);
+          return;
+        }
+        const stateToSave: AddressSearchPersisted = {
+          points,
+          closed,
+          records,
+          truncated,
+          activeId,
+          lastSavedAt: new Date().toISOString(),
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+      } catch (err) {
+        console.warn('Opslaan in LocalStorage (address search) mislukt:', err);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [points, closed, records, truncated, activeId]);
 
   const areaM2 = useMemo(() => computeAreaM2(points), [points]);
   const selfIntersecting = useMemo(
@@ -110,6 +161,11 @@ export const AddressSearchView: React.FC = () => {
     setTruncated(false);
     setError(null);
     setActiveId(null);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -124,7 +180,7 @@ export const AddressSearchView: React.FC = () => {
             Adressenregister &mdash; zoeken binnen polygoon
           </h2>
           <p className="text-xs text-slate-500">
-            Teken een gebied en haal de officiële adressen uit het Vlaamse Adressenregister.
+            Teken een gebied en haal de officiële adressen uit het Vlaamse Adressenregister. (maximaal: {MAX_ADDRESS_RESULTS} records) 
           </p>
         </div>
       </div>

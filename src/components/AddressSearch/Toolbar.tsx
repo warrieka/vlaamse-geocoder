@@ -128,7 +128,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             onClick={onClear}
             disabled={searching}
             title="Tekening en resultaten wissen"
-            className="flex items-center gap-1.5 p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 p-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <Eraser className="w-4 h-4" />
             Data en Tekening wissen.
