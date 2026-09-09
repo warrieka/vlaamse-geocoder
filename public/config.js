@@ -6,7 +6,7 @@
  */
 window.APP_CONFIG = {
   // version of the app
-  version: "2.1",
+  version: "2.2",
   // Maximale bestandsgrootte van het CSV-bestand in Megabytes (MB)
   maxFileSizeMB: 5,
   // Maximaal toegestaan aantal rijen (records) in het CSV-bestand (exclusief koptekst)
@@ -18,5 +18,5 @@ window.APP_CONFIG = {
   // Standaard: 50.000 m² = 5 ha
   maxPolygonAreaM2: 10000000,
   // Maximale aantal adressen dat per zoekopdracht wordt opgehaald en getoond
-  maxAddressResults: 10000,
+  maxAddressResults: 20000,
 };

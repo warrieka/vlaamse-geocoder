@@ -49,6 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={() => onChangeView('geocoder')}
             aria-pressed={activeView === 'geocoder'}
+            aria-current={activeView === 'geocoder' ? 'page' : undefined}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
               activeView === 'geocoder'
                 ? 'bg-white text-slate-900 shadow-xs font-semibold'

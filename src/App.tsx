@@ -15,6 +15,7 @@ import { ModernMap } from './components/Map/ModernMap';
 import { DataTable } from './components/Table/DataTable';
 import { PinpointModal } from './components/Modal/PinpointModal';
 import { useGeocoderRunner } from './hooks/useGeocoderRunner';
+import { useHashRoute } from './hooks/useHashRoute';
 import { exportRowsToCsv, exportRowsToGeoJson } from './services/export';
 import { fromWgs84 } from './services/projections';
 import { Trash2, AlertTriangle, X, Lightbulb } from 'lucide-react';
@@ -48,7 +49,7 @@ const loadSavedState = (): PersistedState | null => {
 export default function App() {
   const [savedInitial] = useState(() => loadSavedState());
 
-  const [activeView, setActiveView] = useState<AppView>('geocoder');
+  const { view: activeView, navigate: changeView } = useHashRoute();
   const [rows, setRows] = useState<AddressRow[]>(() => savedInitial?.rows ?? []);
   const [columns, setColumns] = useState<string[]>(() => savedInitial?.columns ?? [
   ]);
@@ -297,7 +298,7 @@ export default function App() {
       {/* Top Application Header */}
       <Header
         activeView={activeView}
-        onChangeView={setActiveView}
+        onChangeView={changeView}
         rowCount={rows.length}
         matchedCount={matchedCount}
       />
