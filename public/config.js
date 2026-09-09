@@ -17,4 +17,6 @@ window.APP_CONFIG = {
   // Maximale oppervlakte van een getekende polygoon in vierkante meters (m²)
   // Standaard: 50.000 m² = 5 ha
   maxPolygonAreaM2: 10000000,
+  // Maximale aantal adressen dat per zoekopdracht wordt opgehaald en getoond
+  maxAddressResults: 10000,
 };

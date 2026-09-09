@@ -8,6 +8,8 @@ export interface AppConfig {
   maxColumns: number;
   /** Maximum drawn polygon area in m² */
   maxPolygonAreaM2: number;
+  /** Maximum number of addresses fetched/returned by a search */
+  maxAddressResults: number;
 }
 
 declare global {
@@ -22,6 +24,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   maxRows: 5000,
   maxColumns: 50,
   maxPolygonAreaM2: 1000000,
+  maxAddressResults: 5000,
 };
 
 export const getAppConfig = (): AppConfig => {
@@ -45,6 +48,10 @@ export const getAppConfig = (): AppConfig => {
         typeof custom.maxPolygonAreaM2 === 'number' && custom.maxPolygonAreaM2 > 0
           ? custom.maxPolygonAreaM2
           : DEFAULT_CONFIG.maxPolygonAreaM2,
+      maxAddressResults:
+        typeof custom.maxAddressResults === 'number' && custom.maxAddressResults > 0
+          ? custom.maxAddressResults
+          : DEFAULT_CONFIG.maxAddressResults,
     };
   }
   return DEFAULT_CONFIG;

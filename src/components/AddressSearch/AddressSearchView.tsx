@@ -12,6 +12,7 @@ import { Toolbar } from './Toolbar';
 import { Ruler } from 'lucide-react';
 
 const MAX_AREA_M2 = getAppConfig().maxPolygonAreaM2;
+const MAX_ADDRESS_RESULTS = getAppConfig().maxAddressResults;
 
 export const AddressSearchView: React.FC = () => {
   const [points, setPoints] = useState<LngLat[]>([]);
@@ -68,7 +69,7 @@ export const AddressSearchView: React.FC = () => {
     try {
       const result = await fetchAddressesInPolygon(searchPoints, {
         signal: controller.signal,
-        maxRecords: 5000,
+        maxRecords: MAX_ADDRESS_RESULTS,
         pageSize: 250,
       });
       setRecords(result.records);

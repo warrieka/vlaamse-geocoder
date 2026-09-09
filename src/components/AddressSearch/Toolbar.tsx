@@ -29,6 +29,7 @@ interface ToolbarProps {
 }
 
 const MAX_AREA_M2 = getAppConfig().maxPolygonAreaM2;
+const MAX_ADDRESS_RESULTS = getAppConfig().maxAddressResults;
 
 export const Toolbar: React.FC<ToolbarProps> = ({
   searching,
@@ -61,7 +62,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           {truncated && (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-medium">
               <Info className="w-3.5 h-3.5" />
-              Max 5000 adressen getoond
+              Max {MAX_ADDRESS_RESULTS.toLocaleString('nl-BE')} adressen getoond
             </span>
           )}
           {error && (

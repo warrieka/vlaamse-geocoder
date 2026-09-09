@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
+import 'leaflet.markercluster';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { LngLat } from '../../services/polygon';
 import { AddressRecord } from '../../services/addresses';
 import { ZoomIn, ZoomOut, Home, X, Check, Undo2 } from 'lucide-react';
@@ -64,7 +67,7 @@ export const DrawMap: React.FC<DrawMapProps> = ({
   const drawGroupRef = useRef<L.LayerGroup | null>(null);
   const vertexMarkersRef = useRef<L.Marker[]>([]);
 
-  const resultsGroupRef = useRef<L.LayerGroup | null>(null);
+  const resultsGroupRef = useRef<L.MarkerClusterGroup | null>(null);
   const resultsRef = useRef(results);
   resultsRef.current = results;
   const activeIdRef = useRef(activeId);
@@ -109,7 +112,20 @@ export const DrawMap: React.FC<DrawMapProps> = ({
     const group = L.layerGroup().addTo(map);
     drawGroupRef.current = group;
 
-    const resultsGroup = L.layerGroup().addTo(map);
+    const resultsGroup = L.markerClusterGroup({
+      chunkedLoading: true,
+      showCoverageOnHover: false,
+      maxClusterRadius: 45,
+      iconCreateFunction: (cluster) => {
+        const count = cluster.getChildCount();
+        const size = count < 10 ? 36 : count < 100 ? 44 : 52;
+        return L.divIcon({
+          html: `<div style="display:flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:50%;background:#3b82f6;border:2px solid #ffffff;box-shadow:0 2px 6px rgba(0,0,0,0.3);color:#ffffff;font-size:12px;font-weight:600;">${count}</div>`,
+          className: 'result-cluster',
+          iconSize: [size, size],
+        });
+      },
+    }).addTo(map);
     resultsGroupRef.current = resultsGroup;
 
     map.on('mousemove', (e: L.LeafletMouseEvent) => {
@@ -158,7 +174,7 @@ export const DrawMap: React.FC<DrawMapProps> = ({
     }).addTo(mapRef.current);
   }, [basemap]);
 
-  // Draw found addresses as simple blue dots.
+  // Draw found addresses as simple blue dots, clustered when dense.
   useEffect(() => {
     if (!mapRef.current || !resultsGroupRef.current) return;
     const resultsGroup = resultsGroupRef.current;
@@ -167,14 +183,15 @@ export const DrawMap: React.FC<DrawMapProps> = ({
     results
       .filter((r) => r.lat != null && r.lon != null)
       .forEach((r) => {
-        L.circleMarker([r.lat!, r.lon!], {
-          radius: activeIdRef.current === r.id ? 8 : 6,
-          color: '#ffffff',
-          weight: 2,
-          fillColor: activeIdRef.current === r.id ? '#1d4ed8' : '#3b82f6',
-          fillOpacity: 1,
-          interactive: false,
-        }).addTo(resultsGroup);
+        const icon = L.divIcon({
+          className: 'result-dot',
+          html: `<div style="width:${activeIdRef.current === r.id ? 14 : 10}px;height:${activeIdRef.current === r.id ? 14 : 10}px;background:${
+            activeIdRef.current === r.id ? '#1d4ed8' : '#3b82f6'
+          };border:2px solid #ffffff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>`,
+          iconSize: activeIdRef.current === r.id ? [14, 14] : [10, 10],
+          iconAnchor: activeIdRef.current === r.id ? [7, 7] : [5, 5],
+        });
+        L.marker([r.lat!, r.lon!], { icon, interactive: false }).addTo(resultsGroup);
       });
   }, [results, activeId]);
 
