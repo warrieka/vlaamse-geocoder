@@ -1,12 +1,14 @@
 import React from 'react';
-import { getAppConfig } from '@/src/config'; '../../config';
+import { getAppConfig } from '../../config';
 import geolocIcon from '../../assets/Adres.svg';
 import gitIcon from '../../assets/github.svg';
-import { Layers, Lightbulb } from 'lucide-react';
+import { Layers, Lightbulb, Download } from 'lucide-react';
+
+export type AppView = 'geocoder' | 'addressSearch' | 'advisor';
 
 interface HeaderProps {
-  activeView: 'geocoder' | 'advisor';
-  onChangeView: (view: 'geocoder' | 'advisor') => void;
+  activeView: AppView;
+  onChangeView: (view: AppView) => void;
   rowCount: number;
   matchedCount: number;
 }
@@ -37,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </div>
             <p className="text-xs text-slate-500 hidden sm:block">
-               Geocodering & Lambert 72 / 2008 Transformatie &bull; based on Digitaal Vlaanderen API
+               Geocodering &bull; Download Adressen uit Adresseenregister
             </p>
           </div>
         </div>
@@ -60,6 +62,18 @@ export const Header: React.FC<HeaderProps> = ({
                 {matchedCount}/{rowCount}
               </span>
             )}
+          </button>
+          <button
+            onClick={() => onChangeView('addressSearch')}
+            aria-pressed={activeView === 'addressSearch'}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+              activeView === 'addressSearch'
+                ? 'bg-white text-slate-900 shadow-xs font-semibold'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Download className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Adres Download</span>
           </button>
           <button
             onClick={() => onChangeView('advisor')}

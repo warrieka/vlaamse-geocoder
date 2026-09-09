@@ -14,4 +14,7 @@ window.APP_CONFIG = {
   maxRows: 2000,
   // Maximaal aantal kolommen in het CSV-bestand
   maxColumns: 50,
+  // Maximale oppervlakte van een getekende polygoon in vierkante meters (m²)
+  // Standaard: 50.000 m² = 5 ha
+  maxPolygonAreaM2: 10000000,
 };

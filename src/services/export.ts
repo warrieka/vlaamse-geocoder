@@ -1,5 +1,7 @@
 import Papa from 'papaparse';
 import { AddressRow, CrsId } from '../types';
+import { AddressRecord } from './addresses';
+import { transformCoords } from './projections';
 
 export function downloadFile(filename: string, content: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType });
@@ -89,6 +91,82 @@ export function exportRowsToGeoJson(rows: AddressRow[], targetCrs: CrsId, origin
   const baseName = originalFilename ? originalFilename.replace(/\.csv$/i, '') : 'geocoded_addresses';
   downloadFile(
     `${baseName}_geocoded.geojson`,
+    JSON.stringify(geoJson, null, 2),
+    'application/geo+json;charset=utf-8;'
+  );
+}
+
+/**
+ * Export Adressenregister-search results (drawn polygon) to CSV.
+ * Coordinates are emitted in the original OGC WGS84 plus Lambert 2008 (ETRS89)
+ * when coordinates are available.
+ */
+export function exportAddressCsvItems(records: AddressRecord[]) {
+  const data = records.map((r) => {
+    const hasCoord = r.lon != null && r.lat != null;
+    const [x72, y72] = hasCoord
+      ? transformCoords([r.lon as number, r.lat as number], 'EPSG:4326', 'EPSG:31370')
+      : [null, null];
+    return {
+      vollig_adres: r.address,
+      straatnaam: r.street,
+      huisnummer: r.housenr,
+      busnummer: r.bus,
+      postcode: r.postcode,
+      gemeente: r.municipality,
+      adres_status: r.status,
+      positie_specificatie: r.positionSpec,
+      officieel_toegekend: r.official ? 'Ja' : 'Nee',
+      lon_wgs84: r.lon ?? '',
+      lat_wgs84: r.lat ?? '',
+      x_lambert72: x72 ?? '',
+      y_lambert72: y72 ?? '',
+      bron_url: r.detailUrl,
+    };
+  });
+  const csv = Papa.unparse(data, { quotes: true, delimiter: ';' });
+  downloadFile(
+    `adressen_polygoon_${new Date().toISOString().slice(0, 10)}.csv`,
+    csv,
+    'text/csv;charset=utf-8;'
+  );
+}
+
+/**
+ * Export Adressenregister-search results to GeoJSON (WGS84).
+ */
+export function exportAddressGeoJsonItems(records: AddressRecord[]) {
+  const features = records
+    .filter((r) => r.lat != null && r.lon != null)
+    .map((r) => ({
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [r.lon as number, r.lat as number],
+      },
+      properties: {
+        id: r.id,
+        vollig_adres: r.address,
+        straatnaam: r.street,
+        huisnummer: r.housenr,
+        busnummer: r.bus,
+        postcode: r.postcode,
+        gemeente: r.municipality,
+        adres_status: r.status,
+        positie_specificatie: r.positionSpec,
+        officieel_toegekend: r.official,
+        bron_url: r.detailUrl,
+      },
+    }));
+
+  const geoJson = {
+    type: 'FeatureCollection',
+    name: 'Adressenregister_Polygon_Export',
+    crs: { type: 'name', properties: { name: 'urn:ogc:def:crs:OGC:1.3:CRS84' } },
+    features,
+  };
+  downloadFile(
+    `adressen_polygoon_${new Date().toISOString().slice(0, 10)}.geojson`,
     JSON.stringify(geoJson, null, 2),
     'application/geo+json;charset=utf-8;'
   );

@@ -6,6 +6,8 @@ export interface AppConfig {
   maxRows: number;
   /** Maximum columns allowed in CSV */
   maxColumns: number;
+  /** Maximum drawn polygon area in m² */
+  maxPolygonAreaM2: number;
 }
 
 declare global {
@@ -19,6 +21,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   maxFileSizeMB: 10,
   maxRows: 5000,
   maxColumns: 50,
+  maxPolygonAreaM2: 1000000,
 };
 
 export const getAppConfig = (): AppConfig => {
@@ -38,6 +41,10 @@ export const getAppConfig = (): AppConfig => {
         typeof custom.maxColumns === 'number' && custom.maxColumns > 0
           ? custom.maxColumns
           : DEFAULT_CONFIG.maxColumns,
+      maxPolygonAreaM2:
+        typeof custom.maxPolygonAreaM2 === 'number' && custom.maxPolygonAreaM2 > 0
+          ? custom.maxPolygonAreaM2
+          : DEFAULT_CONFIG.maxPolygonAreaM2,
     };
   }
   return DEFAULT_CONFIG;

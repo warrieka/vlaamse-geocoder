@@ -6,7 +6,8 @@ import {
   GeocoderId,
   GeocodeResult,
 } from './types';
-import { Header } from './components/Header/Header';
+import { Header, AppView } from './components/Header/Header';
+import { AddressSearchView } from './components/AddressSearch/AddressSearchView';
 import { AdvisorPanel } from './components/Advisor/AdvisorPanel';
 import { FileImporter } from './components/Upload/FileImporter';
 import { GeocoderToolbar } from './components/Toolbar/GeocoderToolbar';
@@ -47,7 +48,7 @@ const loadSavedState = (): PersistedState | null => {
 export default function App() {
   const [savedInitial] = useState(() => loadSavedState());
 
-  const [activeView, setActiveView] = useState<'geocoder' | 'advisor'>('geocoder');
+  const [activeView, setActiveView] = useState<AppView>('geocoder');
   const [rows, setRows] = useState<AddressRow[]>(() => savedInitial?.rows ?? []);
   const [columns, setColumns] = useState<string[]>(() => savedInitial?.columns ?? [
   ]);
@@ -317,6 +318,8 @@ export default function App() {
               </div>
               <AdvisorPanel />
             </div>
+          ) : activeView === 'addressSearch' ? (
+            <AddressSearchView />
           ) : (
           <div className="flex flex-col gap-4">
             {/* File Importer and Sample loader */}
