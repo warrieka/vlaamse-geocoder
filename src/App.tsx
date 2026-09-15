@@ -18,7 +18,7 @@ import { useGeocoderRunner } from './hooks/useGeocoderRunner';
 import { useHashRoute } from './hooks/useHashRoute';
 import { exportRowsToCsv, exportRowsToGeoJson } from './services/export';
 import { fromWgs84 } from './services/projections';
-import { Trash2, AlertTriangle, X, Lightbulb } from 'lucide-react';
+import { Trash2, AlertTriangle, X, Lightbulb, Layers } from 'lucide-react';
 
 interface PersistedState {
   rows: AddressRow[];
@@ -323,6 +323,20 @@ export default function App() {
             <AddressSearchView />
           ) : (
           <div className="flex flex-col gap-4">
+            {/* Heading */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                <Layers className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-slate-900 tracking-tight">
+                  Adressen in CSV geocoderen
+                </h2>
+                <div  className="text-xs text-slate-500">
+                  Aan de hand aan de Vlaamse Basisregisters (met openstreetmap als fallback)</div>
+              </div>
+            </div>
+
             {/* File Importer and Sample loader */}
             <FileImporter
               onLoadData={handleLoadData}

@@ -9,7 +9,7 @@ import { exportAddressCsvItems, exportAddressGeoJsonItems } from '../../services
 import { DrawMap } from './DrawMap';
 import { AddressTable } from './AddressTable';
 import { Toolbar } from './Toolbar';
-import { Ruler } from 'lucide-react';
+import { Download, Ruler } from 'lucide-react';
 
 const MAX_AREA_M2 = getAppConfig().maxPolygonAreaM2;
 const MAX_ADDRESS_RESULTS = getAppConfig().maxAddressResults;
@@ -173,7 +173,7 @@ export const AddressSearchView: React.FC = () => {
       {/* Heading */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
-          <Ruler className="w-5 h-5" />
+          <Download className="w-5 h-5" />
         </div>
         <div>
           <h2 className="text-sm font-bold text-slate-900 tracking-tight">

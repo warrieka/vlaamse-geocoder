@@ -3,7 +3,7 @@ import L from 'leaflet';
 import { AddressRow, CrsId } from '../../types';
 import { transformCoords, formatCoordinates } from '../../services/projections';
 import { reverseGeocode, geocodeFlemishGeolocation } from '../../services/geocoder';
-import { MapPin, Home, ZoomIn, ZoomOut, Loader2 } from 'lucide-react';
+import { MapPin, Home, ZoomIn, ZoomOut, Loader2, Hash, X } from 'lucide-react';
 import { AddressSearchInput } from './AddressSearchInput';
 
 interface ModernMapProps {
@@ -74,6 +74,7 @@ export const ModernMap: React.FC<ModernMapProps> = ({
     address: string;
     status: 'found' | 'not_found';
   } | null>(null);
+  const [coordBarVisible, setCoordBarVisible] = useState(true);
   const searchMarkerRef = useRef<L.Marker | null>(null);
 
   // Initialize Map
@@ -425,27 +426,46 @@ export const ModernMap: React.FC<ModernMapProps> = ({
         </div>
       )}
 
-      {/* Live Coordinate Status Bar (Bottom Left) */}
-      <div className="absolute bottom-3 left-3 z-20 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200/80 shadow-sm text-xs text-slate-700 flex items-center gap-3">
-        {cursorCoords ? (
-          <>
-            <span className="font-mono text-slate-600">
-              <strong className="text-slate-900">Lambert 2008:</strong> {cursorCoords.xlb.toFixed(1)}, {cursorCoords.ylb.toFixed(1)} m
+      {/* Live Coordinate Status Bar (Bottom Left) — sits above the legend on small screens */}
+      {coordBarVisible ? (
+        <div className="absolute left-3 z-20 bottom-12 md:bottom-3 flex items-center gap-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200/80 shadow-sm text-xs text-slate-700">
+          {cursorCoords ? (
+            <>
+              <span className="font-mono text-slate-600">
+                <strong className="text-slate-900">Lambert 2008:</strong> {cursorCoords.xlb.toFixed(1)}, {cursorCoords.ylb.toFixed(1)} m
+              </span>
+              <span className="text-slate-300">|</span>
+              <span className="font-mono text-slate-500">
+                <strong className="text-slate-900">WGS84:</strong> {cursorCoords.lat.toFixed(5)}°, {cursorCoords.lon.toFixed(5)}°
+              </span>
+            </>
+          ) : (
+            <span className="text-slate-400">Beweeg cursor over kaart voor coördinaten</span>
+          )}
+          {reverseLoading && (
+            <span className="flex items-center gap-1 text-indigo-600 font-medium">
+              <Loader2 className="w-3 h-3 animate-spin" /> Adres ophalen...
             </span>
-            <span className="text-slate-300">|</span>
-            <span className="font-mono text-slate-500">
-              <strong className="text-slate-900">WGS84:</strong> {cursorCoords.lat.toFixed(5)}°, {cursorCoords.lon.toFixed(5)}°
-            </span>
-          </>
-        ) : (
-          <span className="text-slate-400">Beweeg cursor over kaart voor coördinaten</span>
-        )}
-        {reverseLoading && (
-          <span className="flex items-center gap-1 text-indigo-600 font-medium ml-2">
-            <Loader2 className="w-3 h-3 animate-spin" /> Adres ophalen...
-          </span>
-        )}
-      </div>
+          )}
+          <button
+            onClick={() => setCoordBarVisible(false)}
+            className="w-6 h-6 -mr-1 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            title="Coördinatenbalk verbergen"
+            aria-label="Coördinatenbalk verbergen"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setCoordBarVisible(true)}
+          className="absolute left-3 z-20 bottom-12 md:bottom-3 w-7 h-7 flex items-center justify-center rounded-lg bg-white/95 backdrop-blur-sm border border-slate-200/80 shadow-sm text-slate-400 hover:text-slate-700"
+          title="Coördinatenbalk tonen"
+          aria-label="Coördinatenbalk tonen"
+        >
+          <Hash className="w-4 h-4" />
+        </button>
+      )}
 
       {/* Legend (Bottom Right) */}
       <div className="absolute bottom-3 right-3 z-20 bg-white/95 backdrop-blur-sm px-2.5 py-1.5 rounded-lg border border-slate-200/80 shadow-sm text-[11px] text-slate-600 flex items-center gap-3">

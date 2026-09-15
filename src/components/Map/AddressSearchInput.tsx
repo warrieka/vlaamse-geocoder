@@ -1,10 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Loader2, CircleX } from 'lucide-react';
 import { suggestAddresses } from '../../services/geocoder';
 
 interface AddressSearchInputProps {
   onAddressSelect?: (fullAddress: string) => void;
 }
+
+const COLLAPSE_BREAKPOINT = 768;
+
+const getInitialExpanded = () =>
+  typeof window === 'undefined' || window.innerWidth >= COLLAPSE_BREAKPOINT;
 
 export const AddressSearchInput: React.FC<AddressSearchInputProps> = ({
   onAddressSelect,
@@ -14,8 +19,35 @@ export const AddressSearchInput: React.FC<AddressSearchInputProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [expanded, setExpanded] = useState(getInitialExpanded);
+
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Collapse by default when the viewport shrinks (e.g. mobile / narrow window)
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth < COLLAPSE_BREAKPOINT) {
+        setExpanded(false);
+      }
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const handleExpand = () => {
+    setExpanded(true);
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
+
+  const handleContract = () => {
+    setExpanded(false);
+    setQuery('');
+    setIsOpen(false);
+    setSuggestions([]);
+    setActiveIndex(-1);
+  };
 
   useEffect(() => {
     if (debounceRef.current) {
@@ -42,7 +74,7 @@ export const AddressSearchInput: React.FC<AddressSearchInputProps> = ({
     }, 250);
   }, [query]);
 
-  // Close on outside click
+  // Close suggestions on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -82,15 +114,45 @@ export const AddressSearchInput: React.FC<AddressSearchInputProps> = ({
     }
   };
 
+  const hasQuery = query.trim().length > 0;
+
+  // Collapsed: a single compact search button
+  if (!expanded) {
+    return (
+      <div ref={containerRef}>
+        <button
+          type="button"
+          onClick={handleExpand}
+          title="Adres zoeken"
+          aria-label="Adres zoeken"
+          className="w-9 h-9 flex items-center justify-center rounded-lg bg-white/95 backdrop-blur-sm border border-slate-200/80 shadow-md text-slate-700 hover:bg-white hover:text-indigo-700 transition-colors"
+        >
+          <Search className="w-4 h-4" />
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div ref={containerRef} className="relative w-72">
+    <div ref={containerRef} className="w-72 max-w-full">
       <div className="flex items-center bg-white/95 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-200/80 shadow-md">
         {isLoading ? (
           <Loader2 className="w-4 h-4 text-slate-400 animate-spin shrink-0" />
+        ) : hasQuery ? (
+          <button
+            type="button"
+            onClick={handleContract}
+            title="Zoekveld sluiten"
+            aria-label="Zoekveld sluiten"
+            className="shrink-0 text-slate-400 hover:text-slate-700 transition-colors"
+          >
+            <CircleX className="w-4 h-4" />
+          </button>
         ) : (
           <Search className="w-4 h-4 text-slate-400 shrink-0" />
         )}
         <input
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
