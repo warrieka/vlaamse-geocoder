@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Papa from 'papaparse';
 import { ColumnMapping, AddressRow } from '../../types';
 import { getAppConfig } from '../../config';
+import { isXlsx, parseSpreadsheet } from '../../services/fileparse';
 import {
   UploadCloud,
   FileSpreadsheet,
@@ -44,6 +45,7 @@ export const FileImporter: React.FC<FileImporterProps> = ({
   const [customDelimiter, setCustomDelimiter] = useState<string>('');
   const [showMappingDrawer, setShowMappingDrawer] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [fileSource, setFileSource] = useState<'csv' | 'xlsx'>('csv');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const config = getAppConfig();
 
@@ -80,6 +82,46 @@ export const FileImporter: React.FC<FileImporterProps> = ({
     return { street, housenumber, postalCode, municipality };
   };
 
+  const loadParsed = (
+    fields: string[],
+    rawRows: Record<string, any>[],
+    source: 'csv' | 'xlsx',
+    filename: string
+  ) => {
+    const cfg = getAppConfig();
+
+    if (!rawRows || rawRows.length === 0) {
+      setErrorMessage('Het bestand is leeg of bevat geen leesbare rijen.');
+      return;
+    }
+
+    if (fields.length > cfg.maxColumns) {
+      setErrorMessage(
+        `Het bestand bevat ${fields.length} kolommen. Het maximum toegestane aantal is ${cfg.maxColumns} kolommen.`
+      );
+      return;
+    }
+
+    if (rawRows.length > cfg.maxRows) {
+      setErrorMessage(
+        `Het bestand bevat ${rawRows.length.toLocaleString('nl-BE')} rijen. De maximale limiet is ingesteld op ${cfg.maxRows.toLocaleString('nl-BE')} rijen om browser crashes en overbelasting te voorkomen.`
+      );
+      return;
+    }
+
+    setFileSource(source);
+
+    const parsedRows: AddressRow[] = rawRows.map((r, i) => ({
+      id: `row-${i + 1}`,
+      selected: false,
+      data: Object.fromEntries(
+        Object.entries(r).map(([k, v]) => [k, v !== undefined && v !== null ? String(v) : ''])
+      ),
+    }));
+
+    onLoadData(parsedRows, fields, autoDetectMapping(fields), filename);
+  };
+
   const getEffectiveDelimiter = (): string => {
     if (delimiterMode === 'custom') return customDelimiter;
     if (delimiterMode === 'auto') return '';
@@ -88,16 +130,33 @@ export const FileImporter: React.FC<FileImporterProps> = ({
 
   const parseFile = (file: File) => {
     setErrorMessage(null);
-    const config = getAppConfig();
+    if (fileInputRef.current) fileInputRef.current.value = '';
+
+    const cfg = getAppConfig();
 
     // 1. Max file size check
-    const maxBytes = config.maxFileSizeMB * 1024 * 1024;
+    const maxBytes = cfg.maxFileSizeMB * 1024 * 1024;
     if (file.size > maxBytes) {
       const actualMB = (file.size / (1024 * 1024)).toFixed(1);
       setErrorMessage(
-        `Het bestand is te groot (${actualMB} MB). Het maximum is ${config.maxFileSizeMB} MB.`
+        `Het bestand is te groot (${actualMB} MB). Het maximum is ${cfg.maxFileSizeMB} MB.`
       );
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    const isXlsxF = isXlsx(file);
+
+    if (isXlsxF) {
+      parseSpreadsheet(file)
+        .then(({ fields, rows }) => loadParsed(fields, rows, 'xlsx', file.name))
+        .catch((err) => {
+          console.error('XLSX parse error:', err);
+          setErrorMessage(
+            `Fout bij het lezen van het Excel-bestand: ${
+              err?.message || 'Het bestand kon niet worden geopend (mogelijk wordt het bestand beveiligd of beschadigd weergegeven).'
+            }`
+          );
+        });
       return;
     }
 
@@ -109,46 +168,11 @@ export const FileImporter: React.FC<FileImporterProps> = ({
       encoding: encoding,
       ...(delim ? { delimiter: delim } : {}),
       complete: (results) => {
-        if (fileInputRef.current) fileInputRef.current.value = '';
-
-        if (!results.data || results.data.length === 0) {
-          setErrorMessage('Het gekozen CSV-bestand is leeg of kon niet worden gelezen.');
-          return;
-        }
-
-        const rawRows = results.data as Record<string, any>[];
+        const rawRows = (results.data as Record<string, any>[]) || [];
         const fields = results.meta.fields || (rawRows[0] ? Object.keys(rawRows[0]) : []);
-
-        // 2. Max columns check
-        if (fields.length > config.maxColumns) {
-          setErrorMessage(
-            `Het CSV-bestand bevat ${fields.length} kolommen. Het maximum toegestane aantal is ${config.maxColumns} kolommen.`
-          );
-          return;
-        }
-
-        // 3. Max rows check (prevents browser lockups on 5000+ rows)
-        if (rawRows.length > config.maxRows) {
-          setErrorMessage(
-            `Het CSV-bestand bevat ${rawRows.length.toLocaleString('nl-BE')} rijen. De maximale limiet is ingesteld op ${config.maxRows.toLocaleString('nl-BE')} rijen om browser crashes en overbelasting te voorkomen.`
-          );
-          return;
-        }
-
-        const mapped = autoDetectMapping(fields);
-
-        const parsedRows: AddressRow[] = rawRows.map((r, i) => ({
-          id: `row-${i + 1}`,
-          selected: false,
-          data: Object.fromEntries(
-            Object.entries(r).map(([k, v]) => [k, v !== undefined && v !== null ? String(v) : ''])
-          ),
-        }));
-
-        onLoadData(parsedRows, fields, mapped, file.name);
+        loadParsed(fields, rawRows, 'csv', file.name);
       },
       error: (err) => {
-        if (fileInputRef.current) fileInputRef.current.value = '';
         console.error('CSV parse error:', err);
         setErrorMessage(`Fout bij het lezen van het CSV-bestand: ${err.message}`);
       },
@@ -189,7 +213,7 @@ export const FileImporter: React.FC<FileImporterProps> = ({
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv,.txt,text/csv,application/vnd.ms-excel"
+            accept=".csv,.txt,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             className="hidden"
             onChange={handleFileChange}
             disabled={isProcessing}
@@ -200,10 +224,10 @@ export const FileImporter: React.FC<FileImporterProps> = ({
             onClick={() => fileInputRef.current?.click()}
             disabled={isProcessing}
             className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white font-medium px-3 py-1.5 rounded-lg shadow-xs transition-colors disabled:opacity-40"
-            title="Kies een CSV bestand van uw computer"
+            title="Kies een CSV of Excel (xlsx) bestand van uw computer"
           >
             <UploadCloud className="w-3.5 h-3.5 text-white" />
-            <span>CSV Importeren</span>
+            <span>Bestand importeren</span>
           </button>
 
           {/* Clear Button (Right next to Import Button) */}
@@ -212,59 +236,63 @@ export const FileImporter: React.FC<FileImporterProps> = ({
             onClick={onClearData}
             disabled={!hasData || isProcessing}
             className="flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-700 font-medium px-3 py-1.5 rounded-lg border border-rose-200 shadow-2xs transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-            title="Geladen CSV en alle data verwijderen (wist ook uit browseropslag)"
+            title="Geladen bestand en alle data verwijderen (wist ook uit browseropslag)"
           >
             <Trash2 className="w-3.5 h-3.5 text-rose-600" />
             <span>CSV & Data Wissen</span>
           </button>
 
-          {/* Separator / Delimiter Selector */}
-          <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200 text-slate-600">
-            <SlidersHorizontal className="w-3 h-3 text-slate-500" />
-            <span className="font-medium text-slate-700">Scheidingsteken:</span>
-            <select
-              value={delimiterMode}
-              onChange={(e) => setDelimiterMode(e.target.value as DelimiterType)}
-              disabled={isProcessing}
-              className="bg-white border border-slate-200 rounded px-1.5 py-0.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-slate-900"
-              title="Kies of specificeer het scheidingsteken van uw CSV-bestand"
-            >
-              <option value="auto">Automatisch detecteren</option>
-              <option value=";">Puntkomma (;)</option>
-              <option value=",">Komma (,)</option>
-              <option value="&#9;">Tab (\t)</option>
-              <option value="|">Pipe (|)</option>
-              {/* <option value=" ">Spatie ( )</option> */}
-              <option value="custom">Aangepast...</option>
-            </select>
+          {/* Separator / Delimiter Selector (CSV only) */}
+          {fileSource === 'csv' && (
+            <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200 text-slate-600">
+              <SlidersHorizontal className="w-3 h-3 text-slate-500" />
+              <span className="font-medium text-slate-700">Scheidingsteken:</span>
+              <select
+                value={delimiterMode}
+                onChange={(e) => setDelimiterMode(e.target.value as DelimiterType)}
+                disabled={isProcessing}
+                className="bg-white border border-slate-200 rounded px-1.5 py-0.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-slate-900"
+                title="Kies of specificeer het scheidingsteken van uw CSV-bestand"
+              >
+                <option value="auto">Automatisch detecteren</option>
+                <option value=";">Puntkomma (;)</option>
+                <option value=",">Komma (,)</option>
+                <option value="&#9;">Tab (\t)</option>
+                <option value="|">Pipe (|)</option>
+                {/* <option value=" ">Spatie ( )</option> */}
+                <option value="custom">Aangepast...</option>
+              </select>
 
-            {delimiterMode === 'custom' && (
-              <input
-                type="text"
-                value={customDelimiter}
-                onChange={(e) => setCustomDelimiter(e.target.value)}
-                placeholder="bv. ^"
-                maxLength={4}
-                className="w-14 bg-white border border-slate-300 rounded px-1.5 py-0.5 text-xs text-center font-mono font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                title="Voer uw eigen scheidingsteken in (bv. ^, ~, :)"
-                autoFocus
-              />
-            )}
-          </div>
+              {delimiterMode === 'custom' && (
+                <input
+                  type="text"
+                  value={customDelimiter}
+                  onChange={(e) => setCustomDelimiter(e.target.value)}
+                  placeholder="bv. ^"
+                  maxLength={4}
+                  className="w-14 bg-white border border-slate-300 rounded px-1.5 py-0.5 text-xs text-center font-mono font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                  title="Voer uw eigen scheidingsteken in (bv. ^, ~, :)"
+                  autoFocus
+                />
+              )}
+            </div>
+          )}
 
-          {/* Encoding selector */}
-          <div className="flex items-center gap-1 text-slate-500">
-            <span>Codering:</span>
-            <select
-              value={encoding}
-              onChange={(e) => setEncoding(e.target.value as any)}
-              disabled={isProcessing}
-              className="bg-slate-50 border border-slate-200 rounded px-1.5 py-1 text-xs text-slate-700"
-            >
-              <option value="UTF-8">UTF-8</option>
-              <option value="ISO-8859-1">ISO-8859-1 (Excel / ANSI)</option>
-            </select>
-          </div>
+          {/* Encoding selector (CSV only) */}
+          {fileSource === 'csv' && (
+            <div className="flex items-center gap-1 text-slate-500">
+              <span>Codering:</span>
+              <select
+                value={encoding}
+                onChange={(e) => setEncoding(e.target.value as any)}
+                disabled={isProcessing}
+                className="bg-slate-50 border border-slate-200 rounded px-1.5 py-1 text-xs text-slate-700"
+              >
+                <option value="UTF-8">UTF-8</option>
+                <option value="ISO-8859-1">ISO-8859-1 (Excel / ANSI)</option>
+              </select>
+            </div>
+          )}
         </div>
 
         {/* Current File indicator & Column Mapping trigger */}
@@ -323,10 +351,10 @@ export const FileImporter: React.FC<FileImporterProps> = ({
         >
           <UploadCloud className="w-8 h-8 text-slate-400 mx-auto mb-2" />
           <p className="text-xs font-semibold text-slate-800 mb-0.5">
-            Sleep een CSV-bestand hiernaartoe, of klik om te bladeren
+            Sleep een CSV- of Excel (xlsx)-bestand hiernaartoe, of klik om te bladeren
           </p>
           <p className="text-[11px] text-slate-500">
-            Scheidingsteken:{' '}
+            CSV: scheidingsteken &{' '}
             <strong className="text-slate-700 font-medium">
               {delimiterMode === 'auto'
                 ? 'Automatisch detecteren'
@@ -338,7 +366,7 @@ export const FileImporter: React.FC<FileImporterProps> = ({
                 ? 'Spatie ( )'
                 : delimiterMode}
             </strong>{' '}
-            &bull; Codering: {encoding} &bull; Kolommen worden automatisch herkend
+            &bull; codering {encoding} &bull; kolomkoppeling wordt automatisch herkend
           </p>
           <div className="mt-2.5 inline-flex flex-wrap items-center justify-center gap-1.5 text-[10.5px] text-slate-500 bg-white/80 border border-slate-200 px-2.5 py-1 rounded-md shadow-2xs">
             <span className="font-semibold text-slate-700">Limieten:</span>
@@ -356,7 +384,7 @@ export const FileImporter: React.FC<FileImporterProps> = ({
       {currentFilename && showMappingDrawer && (
         <div className="bg-slate-50/80 p-3 rounded-lg border border-slate-200 text-xs flex flex-col gap-2">
           <div className="font-semibold text-slate-800 flex items-center justify-between">
-            <span>Koppel de adreskolommen uit uw CSV:</span>
+            <span>Koppel de adreskolommen uit uw bestand:</span>
             <span className="text-[11px] text-slate-500 font-normal">
               Automatisch gedetecteerd op basis van kolomnamen
             </span>

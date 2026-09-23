@@ -3,20 +3,20 @@ Vlaamse Geocoder
 
 De **Vlaamse Geocoder** is een eenvoudige webtoepassing waarmee je snel een groot aantal Vlaamse adressen kunt omzetten naar geografische coördinaten.
 
-Je kunt een CSV-bestand met adressen inladen, de adressen automatisch laten opzoeken en het resultaat vervolgens bekijken op een kaart of exporteren voor gebruik in bijvoorbeeld **Excel, GIS, ArcGIS Pro of QGIS**.
+Je kunt een CSV- of Excel (xlsx)-bestand met adressen inladen, de adressen automatisch laten opzoeken en het resultaat vervolgens bekijken op een kaart of exporteren voor gebruik in bijvoorbeeld **Excel, GIS, ArcGIS Pro of QGIS**.
 
 ![Demo app](img/demo.gif)
 
 ## Wat kan je ermee?
 
-* Een CSV-bestand met adressen inladen.
+* Een CSV- of Excel (xlsx)-bestand met adressen inladen.
 * Aangeven welke kolommen de **straat, het huisnummer, de postcode en de gemeente** bevatten.
 * Meerdere duizenden adressen in één keer laten geocoderen.
 * De voortgang van de verwerking volgen, pauzeren of stoppen.
 * Resultaten bekijken op een interactieve kaart.
 * Adressen die niet automatisch correct gevonden worden, handmatig op de kaart aanduiden.
 * Adresgegevens rechtstreeks in de tabel aanpassen en opnieuw laten zoeken.
-* De resultaten exporteren als **CSV** of **GeoJSON**.
+* De resultaten exporteren als **CSV**, **Excel (xlsx)** of **GeoJSON**.
 
 ## Hoe nauwkeurig is het resultaat?
 
@@ -43,9 +43,9 @@ Bij de export worden de verschillende coördinaten beschikbaar gemaakt, zodat he
 
 ## Hoe gebruik je de toepassing?
 
-### 1. Laad je CSV-bestand
+### 1. Laad je CSV- of Excel (xlsx)-bestand
 
-Upload een CSV-bestand met de adressen die je wilt opzoeken.
+Upload een CSV- of Excel (xlsx)-bestand met de adressen die je wilt opzoeken. Voor Excel-bestanden wordt het eerste werkblad gelezen; scheidingsteken en codering gelden alleen voor CSV.
 
 Een adres bestaat bij voorkeur uit:
 
@@ -90,7 +90,7 @@ De oorspronkelijke gegevens blijven daarbij behouden, aangevuld met de gevonden 
 
 ## Privacy
 
-De verwerking gebeurt **rechtstreeks in de webbrowser**. Het volledige CSV-bestand wordt dus niet naar een centrale server van de toepassing geüpload.
+De verwerking gebeurt **rechtstreeks in de webbrowser**. Het volledige bestand wordt dus niet naar een centrale server van de toepassing geüpload.
 
 Alleen de afzonderlijke adresopzoekingen worden doorgestuurd naar de gekozen geocoder, zoals Digitaal Vlaanderen of OpenStreetMap.
 

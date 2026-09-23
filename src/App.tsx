@@ -16,7 +16,7 @@ import { DataTable } from './components/Table/DataTable';
 import { PinpointModal } from './components/Modal/PinpointModal';
 import { useGeocoderRunner } from './hooks/useGeocoderRunner';
 import { useHashRoute } from './hooks/useHashRoute';
-import { exportRowsToCsv, exportRowsToGeoJson } from './services/export';
+import { exportRowsToCsv, exportRowsToXlsx, exportRowsToGeoJson } from './services/export';
 import { fromWgs84 } from './services/projections';
 import { Trash2, AlertTriangle, X, Lightbulb, Layers } from 'lucide-react';
 
@@ -362,6 +362,7 @@ export default function App() {
               onPauseResume={pauseResume}
               onStop={stop}
               onExportCsv={() => exportRowsToCsv(rows, selectedCrs, currentFilename)}
+              onExportXlsx={() => exportRowsToXlsx(rows, selectedCrs, currentFilename)}
               onExportGeoJson={() =>
                 exportRowsToGeoJson(rows, selectedCrs, currentFilename)
               }

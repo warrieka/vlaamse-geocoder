@@ -26,6 +26,7 @@ interface GeocoderToolbarProps {
   onPauseResume: () => void;
   onStop: () => void;
   onExportCsv: () => void;
+  onExportXlsx: () => void;
   onExportGeoJson: () => void;
   onClear: () => void;
   stats: GeocodeStats;
@@ -45,6 +46,7 @@ export const GeocoderToolbar: React.FC<GeocoderToolbarProps> = ({
   onPauseResume,
   onStop,
   onExportCsv,
+  onExportXlsx,
   onExportGeoJson,
   onClear,
   stats,
@@ -172,6 +174,13 @@ export const GeocoderToolbar: React.FC<GeocoderToolbarProps> = ({
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
                   Download als CSV
+                </button>
+                <button
+                  onClick={onExportXlsx}
+                  className="w-full px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                  Download als Excel (xlsx)
                 </button>
                 <button
                   onClick={onExportGeoJson}

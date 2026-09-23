@@ -1,13 +1,13 @@
 [Vlaamse Geocoder](https://warrieka.github.io/vlaamse-geocoder/)
 ========================
 
-A modern, browser‑based tool to **batch‑geocode CSV files of Flemish addresses** and convert the results to any Belgian CRS. Everything runs locally in your browser — the CSV never leaves your machine, only the individual geocoding requests go out to the chosen provider.
+A modern, browser‑based tool to **batch‑geocode CSV or Excel (xlsx) files of Flemish addresses** and convert the results to any Belgian CRS. Everything runs locally in your browser — the file never leaves your machine, only the individual geocoding requests go out to the chosen provider.
 
 ![Demo app](img/demo.gif)
 
 ## What you can do
 
-- **Import a CSV** of Flemish addresses (up to 10 MB, 5 000 rows, 50 columns) and map the columns to *straat*, *huisnummer*, *postcode* and *gemeente*.
+- **Import a CSV or Excel (xlsx) file** of Flemish addresses (up to 10 MB, 5 000 rows, 50 columns) and map the columns to *straat*, *huisnummer*, *postcode* and *gemeente*. For xlsx the first worksheet is read; delimiter/encoding options apply to CSV only.
 - **Geocode all rows, selected rows, or a single row** with a real progress bar, pause/resume and stop controls.
 - **Pick the geocoder** (see [Geocoders](#geocoders)) per run — no restart required.
 - **Pick the target CRS** (see [Coordinate systems](#coordinate-systems)) — results are re‑projected on the fly and the export columns match your choice.
@@ -16,6 +16,7 @@ A modern, browser‑based tool to **batch‑geocode CSV files of Flemish address
 - **Edit cells inline**, delete rows, and re‑run geocoding without re‑importing.
 - **Export the results** as:
   - **CSV** — `;` delimited (standard European Excel), with all Lambert 72, Lambert 2008, WGS84, status, matched address, match type, score and the *source* URL alongside the original columns.
+  - **Excel (xlsx)** — the same rich columns as a native, directly-openable spreadsheet.
   - **GeoJSON** — a `FeatureCollection` of points (WGS84) with the same rich properties.
 - **State is persisted** in `localStorage` (debounced), so you can close the tab and pick up where you left off.
 

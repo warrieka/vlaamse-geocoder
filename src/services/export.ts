@@ -3,7 +3,7 @@ import { AddressRow, CrsId } from '../types';
 import { AddressRecord } from './addresses';
 import { transformCoords } from './projections';
 
-export function downloadFile(filename: string, content: string, mimeType: string) {
+export function downloadFile(filename: string, content: BlobPart, mimeType: string) {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -15,8 +15,8 @@ export function downloadFile(filename: string, content: string, mimeType: string
   URL.revokeObjectURL(url);
 }
 
-export function exportRowsToCsv(rows: AddressRow[], targetCrs: CrsId, originalFilename?: string) {
-  const data = rows.map((row) => {
+function buildGeocodeRows(rows: AddressRow[], targetCrs: CrsId) {
+  return rows.map((row) => {
     const res = row.result;
     return {
       x: res?.x !== null && res?.x !== undefined ? res.x : '',
@@ -36,14 +36,42 @@ export function exportRowsToCsv(rows: AddressRow[], targetCrs: CrsId, originalFi
       ...row.data,
     };
   });
+}
+
+function baseNameFrom(originalFilename?: string): string {
+  if (originalFilename) {
+    return originalFilename.replace(/\.(csv|xlsx)$/i, '') || 'geocoded_addresses';
+  }
+  return 'geocoded_addresses';
+}
+
+export function exportRowsToCsv(rows: AddressRow[], targetCrs: CrsId, originalFilename?: string) {
+  const data = buildGeocodeRows(rows, targetCrs);
 
   const csvString = Papa.unparse(data, {
     quotes: true,
     delimiter: ';', // Standard European Excel delimiter
   });
 
-  const baseName = originalFilename ? originalFilename.replace(/\.csv$/i, '') : 'geocoded_addresses';
+  const baseName = baseNameFrom(originalFilename);
   downloadFile(`${baseName}_geocoded.csv`, csvString, 'text/csv;charset=utf-8;');
+}
+
+export async function exportRowsToXlsx(rows: AddressRow[], targetCrs: CrsId, originalFilename?: string) {
+  const XLSX = await import('xlsx');
+  const data = buildGeocodeRows(rows, targetCrs);
+
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Geocodeerresultaten');
+  const out = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
+
+  const baseName = baseNameFrom(originalFilename);
+  downloadFile(
+    `${baseName}_geocoded.xlsx`,
+    out,
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  );
 }
 
 export function exportRowsToGeoJson(rows: AddressRow[], targetCrs: CrsId, originalFilename?: string) {
@@ -129,6 +157,42 @@ export function exportAddressCsvItems(records: AddressRecord[]) {
     `adressen_polygoon_${new Date().toISOString().slice(0, 10)}.csv`,
     csv,
     'text/csv;charset=utf-8;'
+  );
+}
+
+export async function exportAddressXlsxItems(records: AddressRecord[]) {
+  const XLSX = await import('xlsx');
+  const hasCoord = (r: AddressRecord) => r.lon != null && r.lat != null;
+  const data = records.map((r) => {
+    const [x72, y72] = hasCoord(r)
+      ? transformCoords([r.lon as number, r.lat as number], 'EPSG:4326', 'EPSG:31370')
+      : [null, null];
+    return {
+      vollig_adres: r.address,
+      straatnaam: r.street,
+      huisnummer: r.housenr,
+      busnummer: r.bus,
+      postcode: r.postcode,
+      gemeente: r.municipality,
+      adres_status: r.status,
+      positie_specificatie: r.positionSpec,
+      officieel_toegekend: r.official ? 'Ja' : 'Nee',
+      lon_wgs84: r.lon ?? '',
+      lat_wgs84: r.lat ?? '',
+      x_lambert72: x72 ?? '',
+      y_lambert72: y72 ?? '',
+      bron_url: r.detailUrl,
+    };
+  });
+
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Adressenregister');
+  const out = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
+  downloadFile(
+    `adressen_polygoon_${new Date().toISOString().slice(0, 10)}.xlsx`,
+    out,
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
   );
 }
 

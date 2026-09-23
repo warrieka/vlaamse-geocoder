@@ -5,7 +5,7 @@ import {
   AddressRecord,
   fetchAddressesInPolygon,
 } from '../../services/addresses';
-import { exportAddressCsvItems, exportAddressGeoJsonItems } from '../../services/export';
+import { exportAddressCsvItems, exportAddressXlsxItems, exportAddressGeoJsonItems } from '../../services/export';
 import { DrawMap } from './DrawMap';
 import { AddressTable } from './AddressTable';
 import { Toolbar } from './Toolbar';
@@ -195,6 +195,7 @@ export const AddressSearchView: React.FC = () => {
         hasResults={records.length > 0}
         truncated={truncated}
         onExportCsv={() => exportAddressCsvItems(records)}
+        onExportXlsx={() => exportAddressXlsxItems(records)}
         onExportGeoJson={() => exportAddressGeoJsonItems(records)}
         error={error} 
       />
