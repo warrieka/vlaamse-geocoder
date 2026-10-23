@@ -11,7 +11,7 @@ window.APP_CONFIG = {
   maxFileSizeMB: 5,
   // Maximaal toegestaan aantal rijen (records) in het CSV-bestand (exclusief koptekst)
   // Beveiligt tegen browservertragingen of crashes bij bestanden met meer dan 5.000 rijen
-  maxRows: 2000,
+  maxRows: 5000,
   // Maximaal aantal kolommen in het CSV-bestand
   maxColumns: 50,
   // Maximale oppervlakte van een getekende polygoon in vierkante meters (m²)
