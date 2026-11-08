@@ -155,6 +155,22 @@ npm run build         # outputs to dist/
 npm run preview       # build + serve locally
 ```
 
+### Run from the release ZIP (Windows)
+
+Every release ships a `start.bat`  helper (included in the ZIP and in `dist/`), so the app can be used **completely offline** on a Windows machine — no Node.js, no hosting, no installation:
+
+1. Download the ZIP from the [Releases page](https://github.com/warrieka/vlaamse-geocoder/releases) (or run `npm run build` and use the `dist/` folder) and extract it to a folder.
+2. Double‑click `start.bat`.
+3. Your default browser opens `http://127.0.0.1:8000`, where the app is served locally.
+
+Notes:
+
+- **Python 3.7+** must be installed and on the PATH — the script uses `python -m http.server`.
+- The browser is launched as soon as the script starts; if the page doesn't load yet, wait a second and refresh.
+- The server binds to `127.0.0.1` only, so only your own machine can reach it.
+- Stop the server by closing the console window (or pressing `Ctrl+C`).
+- Because the build uses a relative base, any static file server works the same way — `start.bat` is simply the zero‑install option for Windows.
+
 ### Deploy to Cloudflare Pages (manual)
 
 The build uses a relative base (`base: './'` in `vite.config.ts`), so the same `dist/` folder works on any host — at the domain root (Cloudflare Pages, custom domain) or in a subpath (GitHub Pages reserve at `https://warrieka.github.io/vlaamse-geocoder/`).
