@@ -155,6 +155,24 @@ npm run build         # outputs to dist/
 npm run preview       # build + serve locally
 ```
 
+### Deploy to Cloudflare Pages (manual)
+
+The build uses a relative base (`base: './'` in `vite.config.ts`), so the same `dist/` folder works on any host — at the domain root (Cloudflare Pages, custom domain) or in a subpath (GitHub Pages reserve at `https://warrieka.github.io/vlaamse-geocoder/`).
+
+```bash
+# one-time setup
+npx wrangler login                              # browser login
+npx wrangler pages project create vlaamse-geocoder   # only if the project does not exist yet
+
+# deploy (or use the npm script below)
+npm run deploy:cf
+# = npm run build && npx wrangler pages deploy dist
+```
+
+- `wrangler.toml.example` in the repo root is a starting point for an optional `wrangler.toml` (project name); the deploy works without it.
+- After the first deploy you get a `*.pages.dev` URL. Add your own (sub)domain under *Workers & Pages → project → Custom domains*, then point the DNS record at the shown target from your registrar. Cloudflare issues the TLS certificate automatically.
+- No Cloudflare deploy is wired into the CI: GitHub Actions still deploys to GitHub Pages only, and Cloudflare deploys are always run manually.
+
 ## Import format
 
 The importer is forgiving about header names — after upload you just *map* the existing columns to:
