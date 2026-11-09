@@ -7,7 +7,7 @@ Daarnaast kun je met de tab **Adressenregister** officiële adressen downloaden:
 
 De verwerking gebeurt **rechtstreeks in je webbrowser** — je bestand verlaat je computer niet. De toepassing werkt ook op telefoon en tablet.
 
-![Demo app](img/demo.gif)
+![Demo app](https://github.com/warrieka/vlaamse-geocoder/blob/main/img/demo.gif?raw=true)
 
 ## Wat kan je ermee?
 
