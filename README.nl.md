@@ -7,8 +7,6 @@ Daarnaast kun je met de tab **Adressenregister** officiële adressen downloaden:
 
 De verwerking gebeurt **rechtstreeks in je webbrowser** — je bestand verlaat je computer niet. De toepassing werkt ook op telefoon en tablet.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/9J2kRFk9yeQ?si=mCCvkGYREXqjRA0w" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-
 ## Wat kan je ermee?
 
 ### Adressen geocoderen
